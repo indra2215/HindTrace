@@ -3,13 +3,16 @@
 # ⚡ HindTrace
 ### Autonomous Enterprise Incident Commander & Persistent Hindsight Memory Engine
 
+[![Medium Article](https://img.shields.io/badge/Medium-Read%20Article-black?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@kattaindrasenareddy15/hindtrace-teaching-an-incident-response-agent-to-remember-4f4fe56da616?sharedUserId=kattaindrasenareddy15)
 [![GitHub Stars](https://img.shields.io/github/stars/indra2215/HindTrace?style=for-the-badge&color=blue)](https://github.com/indra2215/HindTrace/stargazers)
-[![GitHub Forks](https://img.shields.io/github/forks/indra2215/HindTrace?style=for-the-badge&color=purple)](https://github.com/indra2215/HindTrace/network/members)
 [![Tests Passing](https://img.shields.io/badge/Tests-14%2F14%20OK%20(100%25)-22c55e?style=for-the-badge&logo=pytest&logoColor=white)](#-automated-testing--validation)
 [![Python 3.10+](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110%2B-009688?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![LLM Groq LLaMA 3.3](https://img.shields.io/badge/LLM-Groq%20LLaMA%203.3--70B-F05032?style=for-the-badge&logo=meta&logoColor=white)](https://groq.com/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-EAB308?style=for-the-badge)](LICENSE)
+
+<br/>
+
+> 📖 **Featured Publication on Medium**: [**HindTrace: Teaching an Incident Response Agent to Remember**](https://medium.com/@kattaindrasenareddy15/hindtrace-teaching-an-incident-response-agent-to-remember-4f4fe56da616?sharedUserId=kattaindrasenareddy15)
 
 <br/>
 
@@ -17,7 +20,7 @@
 
 <br/>
 
-[Quickstart Guide](#-quickstart--cloning-guide-5-minute-setup) • [Obtain API Keys & OAuth](#-step-by-step-credential--oauth-acquisition-guide) • [UI Showcase](#-monochrome-studio-interface) • [Architecture](#-system-architecture) • [Directory Layout](#-detailed-directory-layout) • [Benchmarks](#-benchmark-statistics)
+[Read on Medium](https://medium.com/@kattaindrasenareddy15/hindtrace-teaching-an-incident-response-agent-to-remember-4f4fe56da616?sharedUserId=kattaindrasenareddy15) • [Quickstart Guide](#-quickstart--cloning-guide-5-minute-setup) • [Obtain API Keys & OAuth](#-step-by-step-credential--oauth-acquisition-guide) • [Architecture](#-system-architecture) • [Directory Layout](#-detailed-directory-layout) • [Benchmarks](#-benchmark-statistics)
 
 ---
 
@@ -212,7 +215,7 @@ Try testing an incident in the web console:
 
 <div align="center">
 
-![HindTrace Complete System Architecture](docs/screenshots/architecture_diagram.png)
+<img src="docs/screenshots/architecture_diagram.png" alt="HindTrace Complete System Architecture" width="100%" style="border-radius: 8px; border: 1px solid #30363d;" />
 
 </div>
 
@@ -455,9 +458,9 @@ test_retain_and_recall_basic (unit.test_memory.TestHindsightMemory) ... ok
 test_investigate_unanswerable_open_incident (unit.test_pipeline.TestPipeline) ... ok
 test_stage1_router_injection_detection (unit.test_pipeline.TestPipeline) ... ok
 test_stage1_router_valid_query (unit.test_pipeline.TestPipeline) ... ok
-test_acl_security_enforcement (integration.test_end_to_end.TestEndToEndMithra) ... ok
-test_memory_lifecycle (integration.test_end_to_end.TestEndToEndMithra) ... ok
-test_pipeline_router (integration.test_end_to_end.TestEndToEndMithra) ... ok
+test_acl_security_enforcement (integration.test_end_to_end.TestEndToEndHindTrace) ... ok
+test_memory_lifecycle (integration.test_end_to_end.TestEndToEndHindTrace) ... ok
+test_pipeline_router (integration.test_end_to_end.TestEndToEndHindTrace) ... ok
 
 ----------------------------------------------------------------------
 Ran 14 tests in 15.367s
@@ -475,10 +478,7 @@ Simply copy and paste that file into Claude (or ChatGPT) to instantly generate S
 
 ---
 
-## 📄 License
-This project is open-source under the [MIT License](LICENSE).
-
 <div align="center">
   <b>HindTrace</b> — Built for mission-critical enterprise engineering teams.<br/>
-  Star ⭐ this repo if you find it helpful!
+  Read our publication on <a href="https://medium.com/@kattaindrasenareddy15/hindtrace-teaching-an-incident-response-agent-to-remember-4f4fe56da616?sharedUserId=kattaindrasenareddy15"><b>Medium</b></a> | Star ⭐ this repo if you find it helpful!
 </div>

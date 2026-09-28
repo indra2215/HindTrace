@@ -6,11 +6,17 @@ defined in ground_truth/gold_questions.csv.
 """
 
 import os
+import sys
 import csv
 import json
 import time
 from pathlib import Path
 from typing import Optional
+
+# Ensure project root is in sys.path
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
 
 def run_evaluation(
     csv_path: Optional[Path] = None,
@@ -119,4 +125,17 @@ def run_evaluation(
             json.dump(summary, f, indent=2)
 
     return summary
+
+
+if __name__ == "__main__":
+    summary = run_evaluation()
+    print("=" * 60)
+    print(f"HINDTRACE EVALUATION REPORT")
+    print(f"Total Questions: {summary['total_questions']}")
+    print(f"Correct:         {summary['correct']}")
+    print(f"Accuracy:        {summary['accuracy']}%")
+    print(f"Memory Hits:     {summary['memory_hits']} ({summary['memory_hit_rate']}%)")
+    print(f"Duration:        {summary['duration_seconds']}s")
+    print("=" * 60)
+
 
