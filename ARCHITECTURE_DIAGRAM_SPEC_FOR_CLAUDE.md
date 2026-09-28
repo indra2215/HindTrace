@@ -17,6 +17,12 @@
 5. **Real-Time Escalation Ladder**: Automatically fires rich Block-Kit alert cards to Slack `#incidents` on **SEV1** and `#<team>` on **SEV2**, assigning on-call personnel.
 6. **Continuous Retain Contract**: Every resolved incident is summarized and retained in team-scoped memory banks (`org-shared`, `team-cloud`, `team-ml`, `team-backend`).
 
+<div align="center">
+
+![HindTrace Complete System Architecture Reference](docs/screenshots/architecture_diagram.png)
+
+</div>
+
 ---
 
 ## 2. High-Level C4 System Context Diagram (Level 1)

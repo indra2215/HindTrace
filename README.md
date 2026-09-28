@@ -210,6 +210,15 @@ Try testing an incident in the web console:
 
 ## 🏛️ System Architecture
 
+<div align="center">
+
+![HindTrace Complete System Architecture](docs/screenshots/architecture_diagram.png)
+
+</div>
+
+<details>
+<summary><b>View ASCII Flow & Pipeline Stages</b></summary>
+
 ```text
                                   ┌────────────────────────┐
                                   │   Incoming Incident    │
@@ -258,6 +267,8 @@ Try testing an incident in the web console:
                                  │ - Self-Learning Loop    │
                                  └─────────────────────────┘
 ```
+
+</details>
 
 ---
 
