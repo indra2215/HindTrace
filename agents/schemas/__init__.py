@@ -1,0 +1,2 @@
+﻿# HindTrace — agents\schemas package
+

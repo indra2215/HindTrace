@@ -1,0 +1,2 @@
+﻿# HindTrace — database\migrations package
+

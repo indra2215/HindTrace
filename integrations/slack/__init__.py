@@ -1,0 +1,2 @@
+﻿# HindTrace — integrations\slack package
+

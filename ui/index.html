@@ -1,0 +1,167 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HindTrace — Autonomous Incident Investigation & Memory Platform</title>
+  <meta name="description" content="HindTrace: AI-powered incident investigation platform with persistent Hindsight memory, multi-tenant ACL, and Slack/Google integrations." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Background orbs -->
+  <div class="bg-orb orb-1"></div>
+  <div class="bg-orb orb-2"></div>
+  <div class="bg-orb orb-3"></div>
+
+  <!-- Header -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="logo-group">
+        <div class="logo-icon">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" fill="url(#grad)" opacity="0.12"/>
+            <path d="M8 16L14 10L22 18L26 14" stroke="url(#grad)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="16" cy="16" r="3" fill="url(#grad)"/>
+            <defs>
+              <linearGradient id="grad" x1="0" y1="0" x2="32" y2="32">
+                <stop stop-color="#ffffff"/>
+                <stop offset="1" stop-color="#71717a"/>
+              </linearGradient>
+            </defs>
+          </svg>
+        </div>
+        <div>
+          <h1 class="logo-title">HindTrace</h1>
+          <p class="logo-sub">Enterprise Incident Commander & Persistent Memory</p>
+        </div>
+      </div>
+      <nav class="header-nav">
+        <button class="nav-btn active" id="nav-investigate" onclick="switchTab('investigate')">Investigate</button>
+        <button class="nav-btn" id="nav-memory" onclick="switchTab('memory')">Memory Banks</button>
+        <button class="nav-btn" id="nav-eval" onclick="switchTab('eval')">Eval Harness</button>
+      </nav>
+      <div class="header-status">
+        <span class="status-dot" id="status-dot"></span>
+        <span class="status-text" id="status-text">Connecting…</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+
+    <!-- ── TAB: Investigate ── -->
+    <section class="tab-panel active" id="tab-investigate">
+      <div class="two-col">
+
+        <!-- Left: Query panel -->
+        <div class="panel query-panel">
+          <div class="panel-header">
+            <h2>Investigation Query</h2>
+            <span class="badge badge-blue">3-Stage Pipeline</span>
+          </div>
+
+          <!-- Persona selector -->
+          <div class="form-group">
+            <label class="form-label">Who are you?</label>
+            <div class="persona-grid" id="persona-grid">
+              <!-- populated by JS -->
+            </div>
+          </div>
+
+          <!-- SEV selector -->
+          <div class="form-group">
+            <label class="form-label">Severity</label>
+            <div class="sev-row">
+              <button class="sev-btn" data-sev="1" onclick="setSev(1)">SEV 1</button>
+              <button class="sev-btn" data-sev="2" onclick="setSev(2)">SEV 2</button>
+              <button class="sev-btn active" data-sev="3" onclick="setSev(3)">SEV 3</button>
+            </div>
+          </div>
+
+          <!-- Query input -->
+          <div class="form-group">
+            <label class="form-label">Query</label>
+            <textarea id="query-input" class="query-textarea" 
+              placeholder="Describe the incident or ask about a known issue…&#10;&#10;e.g. What caused the HikariPool timeout in INC-201?" rows="5"></textarea>
+          </div>
+
+          <!-- Quick questions -->
+          <div class="form-group">
+            <label class="form-label">Quick Scenarios</label>
+            <div class="quick-grid" id="quick-grid">
+              <!-- populated by JS -->
+            </div>
+          </div>
+
+          <button class="btn-primary" id="submit-btn" onclick="submitInvestigation()">
+            <span class="btn-icon">⚡</span>
+            Investigate
+          </button>
+        </div>
+
+        <!-- Right: Result panel -->
+        <div class="panel result-panel" id="result-panel">
+          <div id="result-placeholder" class="placeholder">
+            <div class="placeholder-icon">🔍</div>
+            <p>Run an investigation to see results</p>
+            <p class="placeholder-sub">The agent will recall from Hindsight memory first, then search the 100-document corpus if needed.</p>
+          </div>
+          <div id="result-content" class="hidden">
+            <!-- populated by JS -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ── TAB: Memory Banks ── -->
+    <section class="tab-panel" id="tab-memory">
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <h2>Hindsight Memory Banks</h2>
+            <p style="font-size:.75rem;color:var(--text-dim);margin-top:2px">Persistent knowledge retained across org-shared, team-ml, and team-cloud</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn-ghost" id="seed-btn" onclick="seedMemory()">⚡ Pre-seed Historical Incidents</button>
+            <button class="btn-ghost" onclick="loadMemory()">↻ Refresh</button>
+          </div>
+        </div>
+        <div class="memory-banks" id="memory-banks">
+          <div class="memory-empty">No memories yet — run some investigations to populate the banks.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TAB: Eval Harness ── -->
+    <section class="tab-panel" id="tab-eval">
+      <div class="panel">
+        <div class="panel-header">
+          <h2>Evaluation Harness</h2>
+          <button class="btn-primary" onclick="runEval()" id="eval-btn">▶ Run 25 Gold Questions</button>
+        </div>
+        <div id="eval-results">
+          <div class="memory-empty">Click "Run 25 Gold Questions" to evaluate the agent against all trap types.</div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Loading overlay -->
+  <div class="loading-overlay hidden" id="loading-overlay">
+    <div class="loading-card">
+      <div class="spinner"></div>
+      <p class="loading-title" id="loading-title">Investigating…</p>
+      <p class="loading-sub" id="loading-sub">Stage 1 — Router: recalling from Hindsight memory</p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

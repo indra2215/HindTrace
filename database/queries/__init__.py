@@ -1,0 +1,2 @@
+﻿# HindTrace — database\queries package
+

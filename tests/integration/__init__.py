@@ -1,0 +1,2 @@
+﻿# HindTrace — tests\integration package
+
