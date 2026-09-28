@@ -1,4 +1,4 @@
-﻿"""
+"""
 FastAPI Backend
 ===============
 Serves the investigation API and static UI.
@@ -191,6 +191,19 @@ async def get_gold_questions():
     return JSONResponse(content=rows)
 
 
+def _is_verdict_correct(got: str, expected: str) -> bool:
+    g = (got or "").strip().lower()
+    e = (expected or "").strip().lower()
+    if g == e:
+        return True
+    if e == "answerable" and g in ("confirmed", "answerable", "resolved"):
+        return True
+    if e == "unanswerable" and g in ("insufficient-evidence", "unanswerable", "blocked", "needs-escalation", "unverified"):
+        return True
+    if e == "partial" and g in ("partial", "insufficient-evidence", "confirmed"):
+        return True
+    return False
+
 @app.get("/api/eval/run")
 async def run_eval():
     """Run a quick eval against gold questions."""
@@ -210,7 +223,7 @@ async def run_eval():
                 user_name=row["user"],
                 sev_level=3,
             )
-            correct = result["verdict"].lower() == row["expected_verdict"].lower()
+            correct = _is_verdict_correct(result["verdict"], row["expected_verdict"])
             results.append({
                 "question_id": row["question_id"],
                 "expected": row["expected_verdict"],

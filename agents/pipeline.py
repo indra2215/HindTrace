@@ -11,41 +11,40 @@ import re
 import json
 import uuid
 import time
+from pathlib import Path
 from typing import Optional
 from openai import OpenAI
+from dotenv import load_dotenv
+
+# Ensure environment is loaded from HindTrace/.env
+load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 # ─── LLM Client (Groq primary → xAI Grok fallback) ──────────────────────────
-# Provider chain: Groq → xAI key-1 → xAI key-2
-# On call failure the cached client is cleared and the next provider is tried.
 _client: Optional[OpenAI] = None
 _default_model: str = "openai/gpt-oss-20b"
-
-_LLM_PROVIDERS = [
-    # (base_url, api_key, model_name)
-    (
-        "https://api.groq.com/openai/v1",
-        os.getenv("GROQ_API_KEY", ""),
-        "openai/gpt-oss-20b",
-    ),
-    (
-        "https://api.x.ai/v1",
-        os.getenv("XAI_API_KEY", ""),
-        "grok-3-mini",
-    ),
-    (
-        "https://api.x.ai/v1",
-        os.getenv("XAI_API_KEY_2", ""),
-        "grok-3-mini",
-    ),
-]
 _provider_idx: int = 0
 
+def _get_providers() -> list[tuple[str, str, str]]:
+    providers = []
+    groq_key = os.getenv("GROQ_API_KEY", "")
+    if groq_key:
+        providers.append(("https://api.groq.com/openai/v1", groq_key, "openai/gpt-oss-20b"))
+    xai_key = os.getenv("XAI_API_KEY", "")
+    if xai_key:
+        providers.append(("https://api.x.ai/v1", xai_key, "grok-3-mini"))
+    xai_key_2 = os.getenv("XAI_API_KEY_2", "")
+    if xai_key_2:
+        providers.append(("https://api.x.ai/v1", xai_key_2, "grok-3-mini"))
+    if not providers:
+        providers.append(("https://api.groq.com/openai/v1", groq_key, "openai/gpt-oss-20b"))
+    return providers
 
 def _get_client_and_model() -> tuple[OpenAI, str]:
     global _client, _default_model, _provider_idx
     if _client:
         return _client, _default_model
-    base_url, api_key, model = _LLM_PROVIDERS[_provider_idx % len(_LLM_PROVIDERS)]
+    providers = _get_providers()
+    base_url, api_key, model = providers[_provider_idx % len(providers)]
     _client = OpenAI(api_key=api_key, base_url=base_url)
     _default_model = model
     return _client, _default_model
@@ -54,8 +53,9 @@ def _get_client_and_model() -> tuple[OpenAI, str]:
 def _llm(system: str, user: str, model: Optional[str] = None, temperature: float = 0.1) -> str:
     """Call LLM with automatic Groq → xAI Grok key-1 → xAI Grok key-2 fallback."""
     global _client, _default_model, _provider_idx
+    providers = _get_providers()
     tried = 0
-    while tried < len(_LLM_PROVIDERS):
+    while tried < len(providers):
         client, def_model = _get_client_and_model()
         use_model = model or def_model
         try:

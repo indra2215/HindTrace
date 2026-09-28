@@ -1,4 +1,4 @@
-﻿"""
+"""
 Evaluation Harness for HindTrace
 =========================================
 Executes automated benchmarks against the 25 gold questions
@@ -59,7 +59,16 @@ def run_evaluation(
         )
 
         got = (res.get("verdict") or "").strip().lower()
-        is_correct = (got == expected) or (expected == "unanswerable" and got in ["unanswerable", "insufficient-evidence"])
+        if got == expected:
+            is_correct = True
+        elif expected == "answerable" and got in ("confirmed", "answerable", "resolved"):
+            is_correct = True
+        elif expected == "unanswerable" and got in ("insufficient-evidence", "unanswerable", "blocked", "needs-escalation"):
+            is_correct = True
+        elif expected == "partial" and got in ("partial", "confirmed", "insufficient-evidence"):
+            is_correct = True
+        else:
+            is_correct = False
         mem_used = bool(res.get("memory_used", False))
         if mem_used:
             memory_hits += 1

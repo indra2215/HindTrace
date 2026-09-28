@@ -356,13 +356,27 @@ def seed_historical_memories() -> int:
             "mapping:FAIL-UI-01",
             {
                 "verdict": "confirmed",
-                "root_cause": "Asset export timeout (INC-410). Referred to across squads as 'asset export timeouts' (ui-ux), 'SVG conversion hangs' (web-dev), and 'figma 504 gateway' (cloud-eng).",
-                "resolution": "Bounded 15s deadline and capped retries to 3.",
+                "root_cause": "Asset export timeout (INC-410 / FAIL-UI-01). Equivalent team-specific phrases: 'asset export timeouts' (ui-ux), 'SVG conversion job hangs' (web-dev), and 'figma-pipeline 504 gateway timeout' (cloud-eng).",
+                "resolution": "All three phrases map to FAIL-UI-01 / INC-410. Bounded 15s deadline and capped retries to 3.",
                 "citations": ["DOC-UI-001", "DOC-UI-003", "DOC-XTEAM-008"],
                 "acl_ceiling": "public-internal",
                 "investigation_id": "INV-HIST-05",
             },
             "public-internal",
+        ),
+        (
+            "team-ml",
+            "runbook:RB-14-torch-2.2.1",
+            {
+                "verdict": "confirmed",
+                "root_cause": "RB-14 step 8 torch-2.2.1 prod EPOCH_RESTART_WORKER failure.",
+                "resolution": "Keep configured worker count and set persistent_workers=false. Do not apply the torch-2.1.0 staging num_workers=0 fix.",
+                "citations": ["DOC-ML-010", "DOC-ML-011"],
+                "acl_ceiling": "team",
+                "owner_team": "ml-eng",
+                "investigation_id": "INV-HIST-06",
+            },
+            "team",
         ),
     ]
 

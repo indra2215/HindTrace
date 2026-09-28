@@ -8,7 +8,8 @@ import sys
 from pathlib import Path
 
 # Add project root to sys.path
-sys.path.insert(0, str(Path(__file__).parent.parent))
+root_dir = Path(__file__).resolve().parent.parent.parent
+sys.path.insert(0, str(root_dir))
 
 from memory.hindsight_client import seed_historical_memories, list_memories
 
