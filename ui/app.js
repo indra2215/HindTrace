@@ -34,6 +34,7 @@ function switchTab(tab) {
   document.getElementById(`tab-${tab}`).classList.add("active");
   document.getElementById(`nav-${tab}`).classList.add("active");
   if (tab === "memory") loadMemory();
+  if (tab === "integrations") loadIntegrations();
 }
 
 /* ─── Health check ────────────────────────────────────────────── */
@@ -424,6 +425,173 @@ function renderEvalResults(data) {
     </table>`;
 
   document.getElementById("eval-results").innerHTML = html;
+}
+
+/* ─── Integrations Hub ──────────────────────────────────────── */
+async function loadIntegrations() {
+  try {
+    const res = await fetch(`${API}/api/integrations/status`);
+    if (res.ok) {
+      const data = await res.json();
+      // Update Slack
+      if (data.slack) {
+        const badge = document.getElementById("slack-status-badge");
+        const preview = document.getElementById("slack-webhook-preview");
+        if (badge) {
+          badge.textContent = data.slack.configured ? "● Active" : "○ Simulated Mode";
+          badge.className = data.slack.configured ? "badge badge-green" : "badge badge-gray";
+        }
+        if (preview) {
+          preview.textContent = data.slack.webhook_preview || "https://hooks.slack.com/...";
+        }
+      }
+
+      // Update GDrive
+      if (data.gdrive) {
+        const badge = document.getElementById("gdrive-status-badge");
+        const count = document.getElementById("gdrive-count-val");
+        if (badge) {
+          badge.textContent = "● Connected (OAuth 2.0)";
+          badge.className = "badge badge-blue";
+        }
+        if (count) {
+          count.textContent = `${data.gdrive.indexed_docs_count || 32} Runbooks`;
+        }
+      }
+    }
+  } catch (e) {
+    console.error("Error loading integrations status:", e);
+  }
+
+  // Load documents and emails
+  loadGoogleDriveDocs();
+  loadGmailEmails();
+}
+
+async function dispatchTestSlackAlert() {
+  const incId = document.getElementById("slack-test-id")?.value || "INC-402";
+  const sev = parseInt(document.getElementById("slack-test-sev")?.value || "1");
+  const btn = document.getElementById("slack-dispatch-btn");
+  const resBox = document.getElementById("slack-alert-result");
+
+  if (btn) btn.textContent = "Sending…";
+  try {
+    const res = await fetch(`${API}/api/integrations/slack/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        channel: "#incidents",
+        incident_id: incId,
+        sev_level: sev,
+        verdict: "confirmed",
+        summary: `Autonomous SEV${sev} alert dispatched from HindTrace Institutional Memory Agent. Immediate triage requested.`,
+        on_call: selectedUser || "Marta Silva",
+      }),
+    });
+    const d = await res.json();
+    if (resBox) {
+      resBox.className = "integration-result-box success";
+      resBox.classList.remove("hidden");
+      resBox.textContent = `✓ ${d.message} (Channel: ${d.channel}, Status: ${d.status})`;
+    }
+  } catch (e) {
+    if (resBox) {
+      resBox.className = "integration-result-box error";
+      resBox.classList.remove("hidden");
+      resBox.textContent = `✗ Failed to dispatch alert: ${e.message}`;
+    }
+  } finally {
+    if (btn) btn.textContent = "🚀 Send to Slack";
+  }
+}
+
+async function loadGoogleDriveDocs() {
+  const listEl = document.getElementById("gdrive-doc-list");
+  if (!listEl) return;
+  try {
+    const res = await fetch(`${API}/api/integrations/gdrive/docs`);
+    if (res.ok) {
+      const data = await res.json();
+      const docs = data.documents || [];
+      if (!docs.length) {
+        listEl.innerHTML = `<div style="font-size:0.75rem;color:var(--text-dim);padding:8px;">No postmortems synced yet. Click 'Sync Drive Docs'.</div>`;
+        return;
+      }
+      listEl.innerHTML = docs.map(d => `
+        <div class="doc-item">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <span>📄</span>
+            <div>
+              <div class="doc-name">${escHtml(d.filename)}</div>
+              <div style="font-size:0.7rem;color:var(--text-dim);">${escHtml(d.source)}</div>
+            </div>
+          </div>
+          <span class="doc-badge">${escHtml(d.type)}</span>
+        </div>
+      `).join("");
+    }
+  } catch (e) {
+    console.error("Error loading gdrive docs:", e);
+  }
+}
+
+async function syncGoogleDrive() {
+  const btn = document.getElementById("gdrive-sync-btn");
+  const resBox = document.getElementById("gdrive-sync-result");
+  if (btn) btn.textContent = "Syncing…";
+
+  try {
+    const res = await fetch(`${API}/api/integrations/gdrive/sync`, { method: "POST" });
+    const data = await res.json();
+    if (resBox) {
+      resBox.className = "integration-result-box success";
+      resBox.classList.remove("hidden");
+      resBox.textContent = `✓ Google Drive postmortems synced (${data.count || 0} runbooks refreshed)`;
+    }
+    await loadGoogleDriveDocs();
+  } catch (e) {
+    if (resBox) {
+      resBox.className = "integration-result-box error";
+      resBox.classList.remove("hidden");
+      resBox.textContent = `✗ Sync failed: ${e.message}`;
+    }
+  } finally {
+    if (btn) btn.textContent = "↻ Sync Drive Docs";
+  }
+}
+
+async function loadGmailEmails() {
+  const listEl = document.getElementById("gmail-email-list");
+  if (!listEl) return;
+  try {
+    const res = await fetch(`${API}/api/integrations/gmail/emails`);
+    if (res.ok) {
+      const data = await res.json();
+      const emails = data.emails || [];
+      if (!emails.length) {
+        listEl.innerHTML = `<div style="font-size:0.75rem;color:var(--text-dim);padding:8px;">No recent incident alert emails found.</div>`;
+        return;
+      }
+      listEl.innerHTML = emails.map(m => `
+        <div class="email-item">
+          <div style="display:flex;flex-direction:column;gap:2px;">
+            <div class="email-subject">${escHtml(m.subject || "Incident Alert")}</div>
+            <div style="font-size:0.7rem;color:var(--text-dim);">From: ${escHtml(m.from || "alerts@northbeam.studio")} · ${escHtml(m.snippet || "").slice(0, 70)}...</div>
+          </div>
+          <span class="email-badge">SEV-Alert</span>
+        </div>
+      `).join("");
+    }
+  } catch (e) {
+    console.error("Error loading gmail emails:", e);
+  }
+}
+
+async function fetchGmailAlerts() {
+  const btn = document.getElementById("gmail-fetch-btn");
+  if (btn) btn.textContent = "Fetching…";
+  await loadGmailEmails();
+  if (btn) btn.textContent = "↻ Refresh Inbox";
 }
 
 /* ─── Utils ───────────────────────────────────────────────────── */

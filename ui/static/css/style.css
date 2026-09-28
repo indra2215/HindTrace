@@ -593,5 +593,188 @@ body {
 .loading-title { font-size: 1.05rem; font-weight: 600; color: #ffffff; }
 .loading-sub { font-size: .82rem; color: var(--text-dim); }
 
+/* ─── Integrations Hub ──────────────────────────────────────── */
+.integrations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+  margin-top: 16px;
+}
+.integration-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  transition: var(--transition);
+}
+.integration-card:hover {
+  border-color: var(--border2);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+}
+.integration-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.integration-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.integration-icon {
+  font-size: 1.5rem;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.integration-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+.integration-subtitle {
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+.integration-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+}
+.meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+.meta-label {
+  color: var(--text-dim);
+  font-weight: 500;
+}
+.meta-val {
+  color: var(--silver);
+  font-weight: 600;
+  text-align: right;
+  word-break: break-all;
+}
+.meta-link {
+  color: #ffffff;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 0.8rem;
+}
+.meta-link:hover {
+  color: var(--silver);
+}
+.integration-actions-box {
+  padding: 12px;
+  background: var(--surface3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+.integration-result-box {
+  margin-top: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border);
+}
+.integration-result-box.success {
+  color: #4ade80;
+  border-color: rgba(74, 222, 128, 0.3);
+  background: rgba(74, 222, 128, 0.06);
+}
+.integration-result-box.error {
+  color: #f87171;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.06);
+}
+
+/* ─── Slack Mock Card ───────────────────────────────────────── */
+.slack-preview-card {
+  display: flex;
+  background: #1a1d21;
+  border: 1px solid #383a40;
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 0.8rem;
+  margin-top: 4px;
+}
+.slack-preview-bar {
+  width: 4px;
+  background: #e01e5a;
+  flex-shrink: 0;
+}
+.slack-preview-content {
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  color: #d1d2d3;
+}
+.slack-preview-header {
+  color: #ffffff;
+  font-size: 0.85rem;
+}
+.slack-preview-text {
+  line-height: 1.4;
+  color: #cccccc;
+}
+.slack-preview-footer {
+  font-size: 0.72rem;
+  color: #999999;
+  margin-top: 4px;
+}
+
+/* ─── Document & Email Lists ────────────────────────────────── */
+.doc-list, .email-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.doc-item, .email-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-size: 0.78rem;
+}
+.doc-item:hover, .email-item:hover {
+  border-color: var(--border2);
+  background: var(--surface3);
+}
+.doc-name, .email-subject {
+  color: #ffffff;
+  font-weight: 500;
+  font-family: var(--font-mono);
+}
+.doc-badge, .email-badge {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+}
+
 /* ─── Utilities ─────────────────────────────────────────────── */
 .hidden { display: none !important; }

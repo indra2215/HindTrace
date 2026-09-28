@@ -42,6 +42,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from api.routes.integrations import router as integrations_router
+app.include_router(integrations_router, prefix="/api")
+
 # ─── Startup: load corpus (BM25 instant, embeddings in background) ────────────
 @app.on_event("startup")
 async def startup_event():

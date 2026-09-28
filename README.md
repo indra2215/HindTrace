@@ -38,6 +38,11 @@ Inspect scoped SQLite memory banks in real-time (`org-shared`, `team-cloud`, `te
 
 ![HindTrace Memory Banks](docs/screenshots/memory_banks.png)
 
+### 3. Enterprise Integrations Hub (Slack, Google Drive, Gmail & Hindsight)
+Real-time multi-channel orchestration connecting live Slack incoming webhooks with interactive block-kit dispatch, Google Drive SRE postmortems & runbooks (`1E8F1ttaPcz6g_iRL3if0IkObGGXt3F_h`), and Gmail alert monitoring:
+
+![HindTrace Enterprise Integrations Hub](docs/screenshots/integrations_hub.png)
+
 ---
 
 ## 🚀 Why HindTrace?
