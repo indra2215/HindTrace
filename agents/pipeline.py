@@ -132,13 +132,14 @@ TEAM_BANKS = {
 
 def resolve_persona(name: str) -> dict:
     if name in PERSONAS:
-        return {"name": name, **PERSONAS[name]}
+        return {"name": name, "authenticated": True, **PERSONAS[name]}
     # Fuzzy: case-insensitive
     nl = name.lower()
     for k, v in PERSONAS.items():
         if k.lower() == nl:
-            return {"name": k, **v}
-    return {"name": name, "team": "unknown", "role": "unknown"}
+            return {"name": k, "authenticated": True, **v}
+    # Unauthenticated / guest persona (zero squad clearance)
+    return {"name": name or "Guest", "team": "guest", "role": "unauthenticated", "authenticated": False}
 
 
 # ─── Stage 1: Router Agent ──────────────────────────────────────────────────
@@ -148,15 +149,17 @@ def stage1_router(query: str, user_name: str) -> dict:
     Classify query, sanitise injection, run recall() before search.
     Returns routing decision dict.
     """
-    from ingestion.indexers.corpus_loader import sanitise_query
+    from security.sanitizers.injection_shield import detect_injection, sanitise_and_wrap
     from memory import hindsight_client as hc
 
     persona = resolve_persona(user_name)
     user_team = persona["team"]
     team_bank = TEAM_BANKS.get(user_team, "org-shared")
 
-    # 1. Sanitise query
-    clean_query, was_injected = sanitise_query(query)
+    # 1. Sanitise query & detect injection using the security subsystem
+    was_injected = detect_injection(query)
+    clean_query, _ = sanitise_and_wrap(query)
+    clean_query = clean_query.replace("<untrusted_document_content>\n", "").replace("\n</untrusted_document_content>", "")
 
     # 2. Extract incident_id from query
     incident_ids = re.findall(r"INC-\d+|DEP-\d+|RB-\d+|PM-\d+|RET-\d+", clean_query.upper())
@@ -193,6 +196,7 @@ def stage1_router(query: str, user_name: str) -> dict:
         "clean_query": clean_query,
         "was_injected": was_injected,
         "persona": persona,
+        "user": persona,
         "user_team": user_team,
         "team_bank": team_bank,
         "incident_ids": incident_ids,
@@ -258,21 +262,35 @@ def stage2_investigator(routing: dict, max_hops: int = 3) -> dict:
         # Form follow-up query based on what's missing
         current_query = _form_followup(clean_query, all_chunks)
 
-    # Build context for LLM
+    from security.sanitizers.injection_shield import sanitise_and_wrap
+    from security.sanitizers.redaction import redact_sensitive_data
+
+    # Build context for LLM: scrub credentials and neutralize indirect prompt injections
     context_blocks = []
     for chunk in all_chunks[:8]:
-        block = f"[{chunk['doc_id']}] ({chunk['doc_type']}, {chunk['status']})\n{chunk['text'][:600]}"
+        raw_text = chunk["text"][:600]
+        scrubbed = redact_sensitive_data(raw_text)
+        wrapped_chunk, _ = sanitise_and_wrap(scrubbed)
+        block = f"[{chunk['doc_id']}] ({chunk['doc_type']}, {chunk['status']})\n{wrapped_chunk}"
         context_blocks.append(block)
     context = "\n\n---\n\n".join(context_blocks)
 
     # Generate answer
     verdict, answer, citations = _generate_answer(clean_query, context, persona, all_chunks)
+    answer = redact_sensitive_data(answer)
 
-    # Citation verification pass
+    # Citation verification pass — verify doc exists, ACL allows, and literal quotes match
     verified_citations = []
     failed_citations = []
     for doc_id in citations:
-        result = verify_citation(doc_id, "", user_team, user_name)
+        quote_candidate = ""
+        for sentence in answer.split("."):
+            if doc_id in sentence:
+                quotes = re.findall(r'["\']([^"\']{6,80})["\']', sentence)
+                if quotes:
+                    quote_candidate = quotes[0]
+                    break
+        result = verify_citation(doc_id, quote_candidate, user_team, user_name)
         if result["valid"]:
             verified_citations.append(doc_id)
         else:
@@ -555,11 +573,12 @@ def investigate(query: str, user_name: str, sev_level: int = 3, memory_only: boo
         hit = routing["memory_hit"]
         try:
             from database.db import record_investigation
+            user_team_rec = routing.get("user_team") or routing.get("persona", {}).get("team", "unknown")
             record_investigation(
                 investigation_id=routing["investigation_id"],
                 query=query,
                 user_name=user_name,
-                user_team=routing.get("user", {}).get("team", "unknown"),
+                user_team=user_team_rec,
                 sev_level=sev_level,
                 verdict=hit.content.get("verdict", "confirmed"),
                 root_cause=hit.content.get("root_cause", ""),
@@ -571,8 +590,8 @@ def investigate(query: str, user_name: str, sev_level: int = 3, memory_only: boo
                 was_injected=routing["was_injected"],
                 escalation_fired=False,
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.exception("Failed to record memory investigation in database: %s", e)
         return {
             "query": query,
             "user": user_name,

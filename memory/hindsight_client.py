@@ -283,23 +283,44 @@ def reflect(bank: str, topic: str) -> str:
     return f"Memory reflection for '{topic}' in bank '{bank}':\n" + "\n".join(lines)
 
 
-def list_memories(bank: str) -> list:
-    """List all memories in a bank (for debug/UI)."""
+def list_memories(
+    bank: str,
+    user_team: Optional[str] = None,
+    user_name: Optional[str] = None,
+    is_admin: bool = False,
+) -> list:
+    """List memories in a bank with squad and role ACL ceiling filtering."""
     with _lock:
         conn = _get_conn()
         rows = conn.execute(
             "SELECT key_name, content, acl_ceiling, updated_at FROM memories WHERE bank = ? ORDER BY updated_at DESC",
             (bank,)
         ).fetchall()
-    return [
-        {
+
+    results = []
+    for r in rows:
+        ceiling = r["acl_ceiling"]
+        content_obj = json.loads(r["content"])
+
+        # Enforce team boundary
+        if ceiling == "team" and user_team and not is_admin:
+            owner_team = content_obj.get("owner_team", "")
+            if owner_team and owner_team != user_team:
+                continue
+
+        # Enforce restricted boundary
+        if ceiling == "restricted" and not is_admin:
+            allowed_users = content_obj.get("allowed_users", [])
+            if not user_name or user_name not in allowed_users:
+                continue
+
+        results.append({
             "key": r["key_name"],
-            "content": json.loads(r["content"]),
+            "content": content_obj,
             "acl_ceiling": r["acl_ceiling"],
             "updated_at": r["updated_at"],
-        }
-        for r in rows
-    ]
+        })
+    return results
 
 
 def seed_historical_memories() -> int:

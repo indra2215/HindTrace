@@ -1,2 +1,2 @@
-﻿# HindTrace — api\routes package
+# HindTrace — api\routes package
 

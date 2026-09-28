@@ -1,2 +1,2 @@
-﻿# HindTrace — ingestion\parsers package
+# HindTrace — ingestion\parsers package
 

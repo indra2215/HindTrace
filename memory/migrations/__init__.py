@@ -1,2 +1,2 @@
-﻿# HindTrace — memory\migrations package
+# HindTrace — memory\migrations package
 

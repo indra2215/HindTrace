@@ -1,4 +1,4 @@
-﻿"""
+"""
 Test Fixtures and Mock Data for HindTrace Test Suite
 """
 

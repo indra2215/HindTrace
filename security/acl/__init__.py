@@ -1,2 +1,2 @@
-﻿# HindTrace — security\acl package
+# HindTrace — security\acl package
 

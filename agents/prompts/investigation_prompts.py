@@ -1,4 +1,4 @@
-﻿"""
+"""
 System Prompts and Prompt Templates for HindTrace Agents
 """
 

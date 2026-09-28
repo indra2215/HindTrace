@@ -1,2 +1,2 @@
-﻿# HindTrace — agents\stages package
+# HindTrace — agents\stages package
 

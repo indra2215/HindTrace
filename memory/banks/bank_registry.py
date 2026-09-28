@@ -1,4 +1,4 @@
-﻿"""
+"""
 Memory Bank Definitions and Scopes for HindTrace
 """
 from typing import Dict, List

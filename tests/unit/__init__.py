@@ -1,2 +1,2 @@
-﻿# HindTrace — tests\unit package
+# HindTrace — tests\unit package
 

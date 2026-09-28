@@ -1,4 +1,4 @@
-﻿"""
+"""
 Live Slack Integration Connector
 =================================
 Connects HindTrace to real Slack workspaces.
@@ -13,8 +13,8 @@ import urllib.request
 from typing import Optional
 
 SLACK_WEBHOOK_URL  = os.getenv("SLACK_WEBHOOK_URL", "")
-SLACK_CLIENT_SECRET = os.getenv("SLACK_CLIENT_SECRET", "669b9efaba109e289b1ed2d550e292da")
-SLACK_APP_ID       = "A0C5WVDTF16"  # https://api.slack.com/apps/A0C5WVDTF16
+SLACK_CLIENT_SECRET = os.getenv("SLACK_CLIENT_SECRET", "")
+SLACK_APP_ID        = os.getenv("SLACK_APP_ID", "")
 
 def post_slack_alert(
     channel: str,

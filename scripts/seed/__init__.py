@@ -1,2 +1,2 @@
-﻿# HindTrace — scripts\seed package
+# HindTrace — scripts\seed package
 

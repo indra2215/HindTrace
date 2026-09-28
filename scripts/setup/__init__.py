@@ -1,2 +1,2 @@
-﻿# HindTrace — scripts\setup package
+# HindTrace — scripts\setup package
 

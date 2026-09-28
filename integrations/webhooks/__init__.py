@@ -1,2 +1,2 @@
-﻿# HindTrace — integrations\webhooks package
+# HindTrace — integrations\webhooks package
 

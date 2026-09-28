@@ -1,4 +1,4 @@
-﻿"""
+"""
 Security and Telemetry Middleware
 """
 import time

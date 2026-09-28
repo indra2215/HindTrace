@@ -1,4 +1,4 @@
-﻿"""
+"""
 CLI Script: Run 25 Gold Questions Evaluation
 ============================================
 Usage: python scripts/run_eval.py

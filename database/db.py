@@ -1,4 +1,4 @@
-﻿"""
+"""
 Database Module for HindTrace
 ======================================
 Stores persistent audit logs and investigation records as specified in

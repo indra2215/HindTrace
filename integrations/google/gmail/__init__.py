@@ -1,2 +1,2 @@
-﻿# HindTrace — integrations\google\gmail package
+# HindTrace — integrations\google\gmail package
 

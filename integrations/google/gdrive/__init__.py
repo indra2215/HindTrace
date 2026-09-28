@@ -1,2 +1,2 @@
-﻿# HindTrace — integrations\google\gdrive package
+# HindTrace — integrations\google\gdrive package
 

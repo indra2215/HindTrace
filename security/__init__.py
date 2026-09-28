@@ -1,4 +1,4 @@
-﻿"""
+"""
 Security Package for HindTrace
 """
 

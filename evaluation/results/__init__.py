@@ -1,2 +1,2 @@
-﻿# HindTrace — evaluation\results package
+# HindTrace — evaluation\results package
 

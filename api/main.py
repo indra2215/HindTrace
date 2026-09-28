@@ -25,10 +25,20 @@ app = FastAPI(
     version="2.0.0"
 )
 
+import asyncio
+from typing import Optional
+
+# Restrict CORS to authorized origins
+_ALLOWED_ORIGINS = os.getenv(
+    "ALLOWED_ORIGINS",
+    "http://localhost:8000,http://127.0.0.1:8000,http://localhost:3000,http://127.0.0.1:3000"
+).split(",")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
+    allow_origins=_ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -109,7 +119,9 @@ async def get_js():
 @app.post("/api/investigate")
 async def investigate_endpoint(req: InvestigateRequest):
     from agents.pipeline import investigate
-    result = investigate(
+    # Offload synchronous multi-stage agent pipeline to worker thread to prevent event-loop blocking
+    result = await asyncio.to_thread(
+        investigate,
         query=req.query,
         user_name=req.user_name,
         sev_level=req.sev_level,
@@ -118,18 +130,26 @@ async def investigate_endpoint(req: InvestigateRequest):
 
 
 @app.get("/api/memory/{bank}")
-async def get_memory(bank: str):
+async def get_memory(bank: str, user_name: Optional[str] = None, user_team: Optional[str] = None):
     from memory.hindsight_client import list_memories
-    memories = list_memories(bank)
+    from agents.pipeline import resolve_persona
+    if user_name and not user_team:
+        p = resolve_persona(user_name)
+        user_team = p.get("team")
+    memories = list_memories(bank, user_team=user_team, user_name=user_name)
     return JSONResponse(content=memories)
 
 
 @app.get("/api/memory")
-async def get_all_memory():
+async def get_all_memory(user_name: Optional[str] = None, user_team: Optional[str] = None):
     from memory.hindsight_client import list_memories
+    from agents.pipeline import resolve_persona
+    if user_name and not user_team:
+        p = resolve_persona(user_name)
+        user_team = p.get("team")
     result = {}
     for bank in ["org-shared", "team-ml", "team-cloud"]:
-        result[bank] = list_memories(bank)
+        result[bank] = list_memories(bank, user_team=user_team, user_name=user_name)
     return JSONResponse(content=result)
 
 
@@ -206,49 +226,14 @@ def _is_verdict_correct(got: str, expected: str) -> bool:
 
 @app.get("/api/eval/run")
 async def run_eval():
-    """Run a quick eval against gold questions."""
-    from agents.pipeline import investigate
-    import csv
-    gt_path = _get_gt_path()
-    csv_path = gt_path / "gold_questions.csv"
-    if not csv_path.exists():
-        return JSONResponse({"error": "gold_questions.csv not found"})
-
-    results = []
-    with open(csv_path, encoding="utf-8") as f:
-        reader = csv.DictReader(f)
-        for row in reader:
-            result = investigate(
-                query=row["question"],
-                user_name=row["user"],
-                sev_level=3,
-            )
-            correct = _is_verdict_correct(result["verdict"], row["expected_verdict"])
-            results.append({
-                "question_id": row["question_id"],
-                "expected": row["expected_verdict"],
-                "got": result["verdict"],
-                "correct": correct,
-                "memory_used": result.get("memory_used", False),
-            })
-
-    total = len(results)
-    correct = sum(1 for r in results if r["correct"])
-    return JSONResponse({
-        "total": total,
-        "correct": correct,
-        "accuracy": correct / total if total else 0,
-        "results": results,
-    })
+    """Run a quick eval against gold questions offloaded to worker thread."""
+    from evaluation.eval_harness import run_evaluation
+    summary = await asyncio.to_thread(run_evaluation)
+    return JSONResponse(summary)
 
 
 @app.get("/api/health")
 async def health():
     from ingestion.indexers.corpus_loader import is_loaded
     return {"status": "ok", "corpus_loaded": is_loaded()}
-
-
-# ─── Static files ────────────────────────────────────────────────────────────
-if ui_dir.exists():
-    app.mount("/static", StaticFiles(directory=str(ui_dir)), name="static")
 

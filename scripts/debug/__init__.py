@@ -1,2 +1,2 @@
-﻿# HindTrace — scripts\debug package
+# HindTrace — scripts\debug package
 

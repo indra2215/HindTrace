@@ -248,20 +248,14 @@ def is_loaded() -> bool:
     return _loaded
 
 
-# ─── ACL filter ─────────────────────────────────────────────────────────────
+# ─── ACL filter (delegates to security subsystem) ───────────────────────────
+from security.acl.acl_guard import check_acl, filter_allowed_chunks
 
 def _acl_allowed(chunk: dict, user_team: str, user_name: str) -> bool:
     tier = chunk.get("tier", "public-internal")
     acl_teams = chunk.get("acl_teams", [])
     acl_users = chunk.get("acl_users", [])
-
-    if tier == "public-internal":
-        return True
-    if tier == "team":
-        return not acl_teams or user_team in acl_teams
-    if tier == "restricted":
-        return user_name in acl_users
-    return False
+    return check_acl(tier, acl_teams, acl_users, user_team, user_name)
 
 
 # ─── Hybrid retrieval ────────────────────────────────────────────────────────

@@ -1,2 +1,2 @@
-﻿# HindTrace — memory\banks package
+# HindTrace — memory\banks package
 

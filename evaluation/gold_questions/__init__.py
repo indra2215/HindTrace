@@ -1,2 +1,2 @@
-﻿# HindTrace — evaluation\gold_questions package
+# HindTrace — evaluation\gold_questions package
 

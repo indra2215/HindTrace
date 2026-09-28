@@ -1,4 +1,4 @@
-﻿"""
+"""
 Integrations Status and Webhook Routes
 """
 import os

@@ -1,2 +1,2 @@
-﻿# HindTrace — api\middleware package
+# HindTrace — api\middleware package
 

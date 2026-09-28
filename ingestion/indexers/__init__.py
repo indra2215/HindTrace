@@ -1,2 +1,2 @@
-﻿# HindTrace — ingestion\indexers package
+# HindTrace — ingestion\indexers package
 

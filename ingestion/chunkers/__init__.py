@@ -1,2 +1,2 @@
-﻿# HindTrace — ingestion\chunkers package
+# HindTrace — ingestion\chunkers package
 

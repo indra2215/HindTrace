@@ -1,2 +1,2 @@
-﻿# HindTrace — tests\fixtures package
+# HindTrace — tests\fixtures package
 

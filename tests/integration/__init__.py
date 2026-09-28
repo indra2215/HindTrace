@@ -1,2 +1,2 @@
-﻿# HindTrace — tests\integration package
+# HindTrace — tests\integration package
 

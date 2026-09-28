@@ -1,4 +1,4 @@
-﻿"""
+"""
 Unit tests for ACL Guardrails (Trap T6)
 """
 

@@ -1,2 +1,2 @@
-﻿# HindTrace — agents\prompts package
+# HindTrace — agents\prompts package
 

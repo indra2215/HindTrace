@@ -1,2 +1,2 @@
-﻿# HindTrace — api\models package
+# HindTrace — api\models package
 

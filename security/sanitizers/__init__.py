@@ -1,2 +1,2 @@
-﻿# HindTrace — security\sanitizers package
+# HindTrace — security\sanitizers package
 

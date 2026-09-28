@@ -419,19 +419,17 @@ Engineering incident logs frequently paste untrusted customer bug reports or att
 
 The server runs on **port 8000** with the Groq API key configured:
 
-```powershell
-cd d:\hack\HindTrace
-$env:PYTHONIOENCODING="utf-8"
-$env:CORPUS_PATH="d:/hack/output_extracted/corpus"
-$env:GROUND_TRUTH_PATH="d:/hack/output_extracted/ground_truth"
-$env:GROQ_API_KEY="gsk_your_groq_api_key_here"
+```bash
+export CORPUS_PATH="data/corpus"
+export GROUND_TRUTH_PATH="data/ground_truth"
+export GROQ_API_KEY="gsk_your_groq_api_key_here"
 python run.py
 ```
 
 Console output:
 ```text
 >> Starting HindTrace
-   Corpus:   d:/hack/output_extracted/corpus
+   Corpus:   data/corpus
    Hindsight: local SQLite mode
    URL:     http://localhost:8000
 

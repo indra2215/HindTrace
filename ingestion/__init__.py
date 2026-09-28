@@ -1,4 +1,4 @@
-﻿"""
+"""
 Ingestion Subsystem for HindTrace
 """
 
