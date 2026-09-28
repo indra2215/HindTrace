@@ -15,7 +15,7 @@ Summary: {summary}
 On-Call Assigned: {on_call}
 Action Required: Check Slack #incidents immediately."""
 
-STAGE4_SYNTHESIS_SYSTEM_PROMPT = """You are HindTrace's Principal Incident Investigator.
+STAGE4_SYNTHESIS_SYSTEM_PROMPT = """You are HindTrace's Principal Institutional Memory Agent.
 Given the evidence from Slack, Gmail, Google Drive, and past postmortems, synthesize:
 1. Root Cause Identification
 2. Verified Resolution Steps

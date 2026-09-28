@@ -1,6 +1,6 @@
 # HindTrace — System Architecture & Complete Engineering Guide
 
-> **AI Incident Investigation Agent with Persistent Hindsight Memory**  
+> **Autonomous Institutional Memory Agent with Persistent Hindsight Memory**  
 > Built for Northbeam Studio · Engineering & DevOps Track  
 > UI Theme: High-Contrast Black & White Monochrome Studio Edition
 
@@ -98,9 +98,9 @@ flowchart TD
     FastPath --> Response(["Investigation Output"])
     
     %% Slow path: Corpus search
-    S1_Gate -->|"NO: Cache Miss"| Stage2["Stage 2: Investigator Agent"]
+    S1_Gate -->|"NO: Cache Miss"| Stage2["Stage 2: Institutional Memory Agent"]
     
-    subgraph Stage2_Box ["Stage 2 — Investigator"]
+    subgraph Stage2_Box ["Stage 2 — Institutional Memory Agent"]
         S2_Search["1. Hybrid Retrieval: BM25 + Entity Matching"]
         S2_ACL["2. Strict ACL Filter: discard unauthorized tiers"]
         S2_Deduce["3. LLM Analysis: detect contradictions and superseded docs"]

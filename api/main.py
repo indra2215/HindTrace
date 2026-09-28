@@ -21,7 +21,7 @@ load_dotenv(project_root / ".env")
 
 app = FastAPI(
     title="HindTrace",
-    description="Autonomous Enterprise Incident Investigation & Memory Platform",
+    description="Autonomous Enterprise Institutional Memory Agent & Incident Resolution Platform",
     version="2.0.0"
 )
 

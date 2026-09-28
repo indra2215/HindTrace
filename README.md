@@ -1,7 +1,7 @@
 <div align="center">
 
 # ⚡ HindTrace
-### Autonomous Enterprise Incident Commander & Persistent Hindsight Memory Engine
+### Autonomous Institutional Memory Agent & Incident Commander with Persistent Hindsight Memory
 
 [![Medium Article](https://img.shields.io/badge/Medium-Read%20Article-black?style=for-the-badge&logo=medium&logoColor=white)](https://medium.com/@kattaindrasenareddy15/hindtrace-teaching-an-incident-response-agent-to-remember-4f4fe56da616?sharedUserId=kattaindrasenareddy15)
 [![GitHub Stars](https://img.shields.io/github/stars/indra2215/HindTrace?style=for-the-badge&color=blue)](https://github.com/indra2215/HindTrace/stargazers)
@@ -16,7 +16,7 @@
 
 <br/>
 
-**HindTrace** is a production-grade autonomous incident investigation platform engineered for high-velocity software teams. It cuts mean-time-to-resolution (MTTR) by **up to 95%** using **0ms persistent memory short-circuits**, zero-trust squad-level RBAC/ACL isolation, prompt injection immunization, and multi-channel Slack/Google Workspace orchestration.
+**HindTrace** is a production-grade autonomous **institutional memory agent** engineered for high-velocity software teams. It cuts mean-time-to-resolution (MTTR) by **up to 95%** using **0ms persistent memory short-circuits**, zero-trust squad-level RBAC/ACL isolation, prompt injection immunization, and multi-channel Slack/Google Workspace orchestration.
 
 <br/>
 
