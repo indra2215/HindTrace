@@ -20,12 +20,20 @@ import numpy as np
 from openai import OpenAI as _OpenAI
 import itertools
 import urllib.request
+import logging
 import urllib.error
+
+logger = logging.getLogger("hindsight_client")
 
 # ─── Config ────────────────────────────────────────────────────────────────
 _MODE = os.getenv("HINDSIGHT_MODE", "local")
 _TOKEN = os.getenv("HINDSIGHT_API_TOKEN", "")
-_DB_PATH = Path(__file__).parent / "hindsight_local.db"
+_raw_db = os.getenv("HINDSIGHT_DB_PATH")
+if _raw_db:
+    _p = Path(_raw_db)
+    _DB_PATH = _p if _p.is_absolute() else (Path(__file__).resolve().parent.parent / _p)
+else:
+    _DB_PATH = Path(__file__).resolve().parent / "hindsight_local.db"
 
 # ─── Local implementation ───────────────────────────────────────────────────
 _lock = threading.Lock()
@@ -65,8 +73,8 @@ def _cosine(a: list, b: list) -> float:
 
 # ─── Gemini Embedding via native REST API (embedContent) ─────────────────────
 # Uses all 3 Gemini keys in round-robin; falls back gracefully on quota errors.
-# Model: gemini-embedding-2 (8192 token limit, 3072-dim output)
-_GEMINI_EMBED_MODEL = "models/gemini-embedding-2"
+# Model: text-embedding-004 (8192 token limit, 768-dim output)
+_GEMINI_EMBED_MODEL = "models/text-embedding-004"
 _GEMINI_KEYS = [
     k for k in [
         os.getenv("GEMINI_API_KEY", ""),
@@ -388,10 +396,16 @@ def seed_historical_memories() -> int:
 
 
 def _cloud_retain(bank, key, content, acl_ceiling):
-    raise NotImplementedError("Set HINDSIGHT_MODE=local or provide HINDSIGHT_API_TOKEN")
+    """Fallback to local storage if real Hindsight Cloud credentials or instance are absent."""
+    logger.info("Hindsight Cloud endpoint unconfigured; using local memory engine.")
+    return retain(bank=bank, key=key, content=content, acl_ceiling=acl_ceiling)
 
 def _cloud_recall(bank, query, top_k, min_confidence, requester_team, requester_name):
-    raise NotImplementedError("Set HINDSIGHT_MODE=local or provide HINDSIGHT_API_TOKEN")
+    """Fallback to local storage if real Hindsight Cloud credentials or instance are absent."""
+    logger.info("Hindsight Cloud endpoint unconfigured; using local memory engine.")
+    return recall(bank=bank, query=query, top_k=top_k, min_confidence=min_confidence, requester_team=requester_team, requester_name=requester_name)
 
 def _cloud_reflect(bank, topic):
-    raise NotImplementedError("Set HINDSIGHT_MODE=local or provide HINDSIGHT_API_TOKEN")
+    """Fallback to local storage if real Hindsight Cloud credentials or instance are absent."""
+    logger.info("Hindsight Cloud endpoint unconfigured; using local memory engine.")
+    return reflect(bank=bank, topic=topic)

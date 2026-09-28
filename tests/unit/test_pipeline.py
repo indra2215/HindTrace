@@ -2,11 +2,13 @@
 Integration tests for 3-Stage Pipeline
 """
 
+import os
 import sys
 from pathlib import Path
 import unittest
 
-sys.path.insert(0, str(Path(__file__).parent.parent))
+os.environ.setdefault("GROQ_API_KEY", "gsk_test_dummy_for_testing")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
 
 from agents.pipeline import stage1_router, investigate, resolve_persona
 

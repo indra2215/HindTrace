@@ -37,17 +37,17 @@ app.add_middleware(
 async def startup_event():
     import threading
     from ingestion.indexers.corpus_loader import load_corpus
-    raw_path = os.getenv("CORPUS_PATH", "../output_extracted/corpus")
+    raw_path = os.getenv("CORPUS_PATH", "data/corpus")
     p = Path(raw_path)
     if not p.is_absolute():
         if (project_root / p).exists():
             corpus_path = project_root / p
         elif (Path.cwd() / p).exists():
             corpus_path = Path.cwd() / p
-        elif Path("d:/hack/output_extracted/corpus").exists():
-            corpus_path = Path("d:/hack/output_extracted/corpus")
+        elif (project_root / "data" / "corpus").exists():
+            corpus_path = project_root / "data" / "corpus"
         else:
-            corpus_path = project_root / p
+            corpus_path = project_root / "data" / "corpus"
     else:
         corpus_path = p
 
@@ -79,7 +79,7 @@ class FeedbackRequest(BaseModel):
 
 ui_dir = project_root / "ui"
 if not ui_dir.exists():
-    ui_dir = Path("d:/hack/HindTrace/ui")
+    ui_dir = Path.cwd() / "ui"
 
 if (ui_dir / "static").exists():
     app.mount("/static", StaticFiles(directory=str(ui_dir / "static")), name="static")
@@ -166,14 +166,14 @@ async def get_personas():
 
 
 def _get_gt_path() -> Path:
-    raw_gt = os.getenv("GROUND_TRUTH_PATH", "../output_extracted/ground_truth")
+    raw_gt = os.getenv("GROUND_TRUTH_PATH", "data/ground_truth")
     p = Path(raw_gt)
     if p.is_absolute() and p.exists():
         return p
-    for candidate in [project_root / p, Path.cwd() / p, Path("d:/hack/output_extracted/ground_truth")]:
+    for candidate in [project_root / p, project_root / "data" / "ground_truth", Path.cwd() / "data" / "ground_truth"]:
         if candidate.exists():
             return candidate
-    return project_root / p
+    return project_root / "data" / "ground_truth"
 
 
 @app.get("/api/gold-questions")

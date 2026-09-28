@@ -21,11 +21,11 @@ def run_evaluation(
     from agents.pipeline import investigate
 
     if csv_path is None:
-        raw_gt = os.getenv("GROUND_TRUTH_PATH", "../output_extracted/ground_truth")
+        raw_gt = os.getenv("GROUND_TRUTH_PATH", "data/ground_truth")
         p = Path(raw_gt)
         if not p.is_absolute():
-            project_root = Path(__file__).parent.parent
-            candidates = [project_root / p, Path.cwd() / p, Path("d:/hack/output_extracted/ground_truth")]
+            project_root = Path(__file__).resolve().parent.parent
+            candidates = [project_root / p, project_root / "data" / "ground_truth", Path.cwd() / "data" / "ground_truth"]
             csv_path = next((c / "gold_questions.csv" for c in candidates if (c / "gold_questions.csv").exists()), None)
         else:
             csv_path = p / "gold_questions.csv"

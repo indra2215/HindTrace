@@ -1,7 +1,14 @@
-﻿"""
+"""
 End-to-End Integration Tests for HindTrace
 """
+import os
+import sys
+from pathlib import Path
 import unittest
+
+os.environ.setdefault("GROQ_API_KEY", "gsk_test_dummy_for_testing")
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent.parent))
+
 from agents.pipeline import stage1_router
 from security.acl.acl_guard import check_acl
 from memory.hindsight_client import recall, retain

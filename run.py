@@ -1,4 +1,4 @@
-﻿"""
+"""
 Entry point for HindTrace
 Run: python run.py
 """
@@ -18,7 +18,7 @@ import uvicorn
 
 if __name__ == "__main__":
     print(">> Starting HindTrace")
-    print("   Corpus:  ", os.getenv("CORPUS_PATH", "../output_extracted/corpus"))
+    print("   Corpus:  ", os.getenv("CORPUS_PATH", "data/corpus"))
     print("   Hindsight: local SQLite mode")
     print("   URL:     http://localhost:8000\n")
 

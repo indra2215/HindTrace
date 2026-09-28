@@ -22,7 +22,7 @@ import urllib.error
 from openai import OpenAI as _OpenAI
 
 # ─── Config ────────────────────────────────────────────────────────────────
-CORPUS_DIR = Path(os.getenv("CORPUS_PATH", "../output_extracted/corpus"))
+CORPUS_DIR = Path(os.getenv("CORPUS_PATH", "data/corpus"))
 
 # ─── Chunk store (in-memory) ────────────────────────────────────────────────
 _chunks: list[dict] = []
@@ -31,8 +31,8 @@ _loaded = False
 _lock = threading.Lock()
 
 # ─── Gemini Embedding via native REST (embedContent) ─────────────────────────
-# Model: gemini-embedding-2 (8192 token limit) — native REST, no extra packages
-_GEMINI_EMBED_MODEL = "models/gemini-embedding-2"
+# Model: text-embedding-004 (native REST, no extra packages)
+_GEMINI_EMBED_MODEL = "models/text-embedding-004"
 _GEMINI_KEYS = [
     k for k in [
         os.getenv("GEMINI_API_KEY", ""),
