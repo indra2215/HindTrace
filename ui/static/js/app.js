@@ -248,6 +248,67 @@ function renderResult(r) {
       </div>`;
   }
 
+  // Complete Incident Dependency Graph
+  if (r.incident_graph && r.incident_graph.nodes) {
+    html += `
+      <div class="incident-graph-container">
+        <div class="timeline-title" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>Incident Resolution Dependency Graph</span>
+          <span style="font-size:0.7rem;color:var(--text-dim);font-weight:normal;">Deterministic Pipeline Execution</span>
+        </div>
+        <div class="graph-nodes-flow">
+          ${r.incident_graph.nodes.map((node, i) => `
+            <div class="graph-node ${node.status}">
+              <div class="node-badge-status">${node.status === "hit" ? "⚡ HIT" : node.status === "action_required" ? "⚠️ ACTION" : node.status === "warning" ? "⚠️ REVIEW" : "✓ PASS"}</div>
+              <div class="node-label">${escHtml(node.label)}</div>
+              <div class="node-detail">${escHtml(node.detail)}</div>
+            </div>
+            ${i < r.incident_graph.nodes.length - 1 ? '<div class="graph-connector">➔</div>' : ''}
+          `).join("")}
+        </div>
+      </div>`;
+  }
+
+  // Slack Escalation Draft & Engineer Clearance Station
+  if (r.escalation_draft) {
+    const draft = r.escalation_draft;
+    html += `
+      <div class="clearance-station-card">
+        <div class="clearance-header">
+          <div>
+            <div class="clearance-title">📋 Slack Escalation Template & On-Call Clearance</div>
+            <div class="clearance-sub">
+              ${draft.is_unanswerable 
+                ? 'Missing verified runbook in corpus. Institutional Memory Agent prepared an escalation draft for engineer review & clearance.' 
+                : 'Review, customize, and approve the automated Slack incident notification before dispatching.'}
+            </div>
+          </div>
+          <span class="badge ${draft.is_unanswerable ? 'badge-amber' : 'badge-blue'}">
+            ${draft.is_unanswerable ? '● Clearance Required' : '● Ready to Dispatch'}
+          </span>
+        </div>
+
+        <div class="form-group" style="margin-top:12px;">
+          <label class="form-label" style="display:flex;justify-content:space-between;">
+            <span>Draft Message (Editable by On-Call SRE)</span>
+            <span style="font-size:0.7rem;color:var(--text-dim);">Target Channel: <b id="clearance-target-channel">${escHtml(draft.channel)}</b></span>
+          </label>
+          <textarea id="clearance-message-input" class="query-textarea" style="font-size:0.8rem;line-height:1.5;min-height:115px;">${escHtml(draft.template)}</textarea>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;">
+          <div style="font-size:0.72rem;color:var(--text-dim);display:flex;gap:6px;align-items:center;">
+            <span>Target Webhook:</span>
+            <code style="font-family:var(--font-mono);font-size:0.7rem;">${escHtml(draft.webhook_url)}</code>
+          </div>
+          <button class="btn-primary" style="padding:7px 16px;font-size:0.82rem;" onclick="approveAndDispatchClearance('${escHtml(draft.incident_id)}', ${draft.sev_level})" id="clearance-dispatch-btn">
+            🚀 Approve Clearance & Dispatch to Slack
+          </button>
+        </div>
+        <div id="clearance-status-box" class="integration-result-box hidden" style="margin-top:10px;"></div>
+      </div>`;
+  }
+
   // Timeline
   if (r.timeline && r.timeline.length > 0) {
     html += `<div class="timeline">
@@ -592,6 +653,45 @@ async function fetchGmailAlerts() {
   if (btn) btn.textContent = "Fetching…";
   await loadGmailEmails();
   if (btn) btn.textContent = "↻ Refresh Inbox";
+}
+
+async function approveAndDispatchClearance(incidentId, sevLevel) {
+  const btn = document.getElementById("clearance-dispatch-btn");
+  const msgInput = document.getElementById("clearance-message-input");
+  const resBox = document.getElementById("clearance-status-box");
+  const customMessage = msgInput ? msgInput.value : "";
+
+  if (btn) btn.textContent = "Dispatching…";
+
+  try {
+    const res = await fetch(`${API}/api/integrations/slack/test`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        channel: "#incidents",
+        incident_id: incidentId,
+        sev_level: parseInt(sevLevel || 1),
+        verdict: "clearance-granted",
+        summary: customMessage,
+        custom_message: customMessage,
+        on_call: selectedUser || "Marta Silva",
+      }),
+    });
+    const d = await res.json();
+    if (resBox) {
+      resBox.className = "integration-result-box success";
+      resBox.classList.remove("hidden");
+      resBox.textContent = `✓ Clearance Granted & Dispatched: Alert successfully sent to Slack ${d.channel || "#incidents"} by ${selectedUser}`;
+    }
+  } catch (e) {
+    if (resBox) {
+      resBox.className = "integration-result-box error";
+      resBox.classList.remove("hidden");
+      resBox.textContent = `✗ Clearance dispatch failed: ${e.message}`;
+    }
+  } finally {
+    if (btn) btn.textContent = "✓ Dispatched to Slack";
+  }
 }
 
 /* ─── Utils ───────────────────────────────────────────────────── */

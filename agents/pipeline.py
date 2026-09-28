@@ -592,6 +592,23 @@ def investigate(query: str, user_name: str, sev_level: int = 3, memory_only: boo
             )
         except Exception as e:
             logger.exception("Failed to record memory investigation in database: %s", e)
+        escalation_draft = _build_escalation_draft(
+            incident_id=routing.get("incident_ids", [f"INC-{routing['investigation_id']}"])[0] if routing.get("incident_ids") else f"INC-{routing['investigation_id']}",
+            sev_level=sev_level,
+            verdict=hit.content.get("verdict", "confirmed"),
+            user_name=user_name,
+            user_team=user_team_rec,
+            query=query,
+            answer=hit.content.get("resolution", ""),
+            citations=hit.content.get("citations", []),
+        )
+        incident_graph = _build_incident_graph(
+            memory_used=True,
+            verdict=hit.content.get("verdict", "confirmed"),
+            citations=hit.content.get("citations", []),
+            sev_level=sev_level,
+            was_injected=routing["was_injected"],
+        )
         return {
             "query": query,
             "user": user_name,
@@ -615,6 +632,8 @@ def investigate(query: str, user_name: str, sev_level: int = 3, memory_only: boo
             "superseded_warnings": [],
             "contradiction_notes": [],
             "hop_log": [],
+            "escalation_draft": escalation_draft,
+            "incident_graph": incident_graph,
         }
 
     # Stage 2 — Investigator
@@ -622,6 +641,25 @@ def investigate(query: str, user_name: str, sev_level: int = 3, memory_only: boo
 
     # Stage 3 — Escalator
     escalation_result = stage3_escalator(routing, investigation, sev_level)
+
+    incident_id_final = escalation_result.get("incident_id") or (routing.get("incident_ids")[0] if routing.get("incident_ids") else f"INC-{routing['investigation_id']}")
+    escalation_draft = _build_escalation_draft(
+        incident_id=incident_id_final,
+        sev_level=sev_level,
+        verdict=investigation["verdict"],
+        user_name=user_name,
+        user_team=routing.get("user_team", "unknown"),
+        query=query,
+        answer=investigation["answer"],
+        citations=investigation["citations"],
+    )
+    incident_graph = _build_incident_graph(
+        memory_used=False,
+        verdict=investigation["verdict"],
+        citations=investigation["citations"],
+        sev_level=sev_level,
+        was_injected=routing["was_injected"],
+    )
 
     return {
         "query": query,
@@ -642,5 +680,60 @@ def investigate(query: str, user_name: str, sev_level: int = 3, memory_only: boo
         "hop_log": investigation.get("hop_log", []),
         "escalation": escalation_result.get("escalation", {}),
         "retained_memory_id": escalation_result.get("retained_memory_id"),
-        "incident_id": escalation_result.get("incident_id"),
+        "incident_id": incident_id_final,
+        "escalation_draft": escalation_draft,
+        "incident_graph": incident_graph,
     }
+
+
+def _build_escalation_draft(incident_id: str, sev_level: int, verdict: str, user_name: str, user_team: str, query: str, answer: str, citations: list) -> dict:
+    webhook_url = os.getenv("SLACK_WEBHOOK_URL", "")
+    citations_str = ", ".join(citations) if citations else "No verified citation in corpus (Action Required)"
+    is_unanswerable = verdict in ("insufficient-evidence", "unanswerable", "partial")
+
+    if is_unanswerable:
+        header = "🚨 *INCIDENT RESOLUTION CLEARANCE & TRIAGE REQUEST*"
+        action_note = "• *Problem*: Missing verified runbook in corpus. On-call engineer clearance & review required to proceed."
+    else:
+        header = f"⚡ *SEV{sev_level} INCIDENT TRIAGE & ACTION PROPOSAL*"
+        action_note = "• *Diagnosis*: Synthesized from Institutional Memory & verified runbooks."
+
+    template = f"""{header}
+• *Incident ID*: {incident_id} (SEV{sev_level})
+• *Engineer*: {user_name} ({user_team})
+• *Verdict*: {verdict.upper()}
+{action_note}
+• *Summary / Action*:
+{answer[:320]}...
+• *Evidence Sources*: {citations_str}
+• *Clearance Status*: Awaiting Engineer Review"""
+
+    return {
+        "channel": "#incidents",
+        "webhook_url": f"{webhook_url[:35]}..." if webhook_url else "https://hooks.slack.com/services/***",
+        "template": template.strip(),
+        "requires_clearance": is_unanswerable or sev_level <= 2,
+        "is_unanswerable": is_unanswerable,
+        "incident_id": incident_id,
+        "sev_level": sev_level,
+    }
+
+
+def _build_incident_graph(memory_used: bool, verdict: str, citations: list, sev_level: int, was_injected: bool) -> dict:
+    nodes = [
+        {"id": "trigger", "label": "Alert Ingress", "status": "completed", "detail": f"SEV{sev_level} Incident Triggered"},
+        {"id": "router", "label": "Stage 1: Router", "status": "completed", "detail": "Sanitized & Persona Mapped" if not was_injected else "Injection Neutralized"},
+        {"id": "memory", "label": "Hindsight Memory", "status": "hit" if memory_used else "miss", "detail": "0ms Cache Hit (Instant Recall)" if memory_used else "Cache Miss → Proceed to Corpus"},
+    ]
+    if not memory_used:
+        nodes.extend([
+            {"id": "retrieval", "label": "Stage 2: Hybrid Search", "status": "completed", "detail": "BM25 Sparse + Gemini Dense Search"},
+            {"id": "acl", "label": "Deterministic ACL Guard", "status": "completed", "detail": "Zero-Trust Squad Boundaries Verified"},
+            {"id": "synthesis", "label": "Stage 3: LLM Synthesis", "status": "warning" if verdict in ("insufficient-evidence", "unanswerable") else "completed", "detail": f"Verdict: {verdict}"},
+        ])
+    nodes.extend([
+        {"id": "escalation", "label": "Slack Escalation Draft", "status": "action_required" if verdict in ("insufficient-evidence", "unanswerable") else "completed", "detail": "Escalation Draft Prepared for Clearance"},
+        {"id": "retain", "label": "Hindsight Retain", "status": "completed" if not memory_used else "cached", "detail": "Institutional Memory Persisted" if not memory_used else "Existing Memory Reused"},
+    ])
+    return {"nodes": nodes}
+

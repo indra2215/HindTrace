@@ -17,6 +17,7 @@ class SlackTestPayload(BaseModel):
     verdict: str = "confirmed"
     summary: str = "Test SEV1 incident escalation alert dispatched from HindTrace Institutional Memory Agent."
     on_call: str = "Marta Silva"
+    custom_message: Optional[str] = None
 
 @router.get("/status")
 def integrations_status():
@@ -68,12 +69,13 @@ def integrations_status():
 @router.post("/slack/test")
 def test_slack_alert(payload: SlackTestPayload):
     from integrations.slack.slack_client import post_slack_alert
+    summary_text = payload.custom_message if payload.custom_message else payload.summary
     success = post_slack_alert(
         channel=payload.channel,
         incident_id=payload.incident_id,
         sev_level=payload.sev_level,
         verdict=payload.verdict,
-        summary=payload.summary,
+        summary=summary_text,
         on_call=payload.on_call,
     )
     return JSONResponse({
